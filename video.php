@@ -4,8 +4,8 @@
 $video_url = $_GET["video"];
 
 // for getting the video list
-$video_dir = "/var/www/vpn/downloads";
-$video_dir_url = "http://vpn.bismith.net/vpn/downloads";
+$video_dir = "/var/www/public/temp/downloads";
+$video_dir_url = "http://vps.bismith.net/temp/downloads";
 
 function startsWith($haystack, $needle)
 {
