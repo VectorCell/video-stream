@@ -74,44 +74,44 @@ function getClientInfo()
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 
-		<head>
-			<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-			<title>Video</title>
-			<style type="text/css">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+		<title>Video</title>
+		<style type="text/css">
 
-				body {
-					margin: 0;
-					border: 0;
-					padding: 0;
-					background-color: #000000;
-					font-family: "Lucida Console", Monaco, monospace;
-					font-size: 14px;
-					/* overflow: hidden; */
-				}
+			body {
+				margin: 0;
+				border: 0;
+				padding: 0;
+				background-color: #000000;
+				font-family: "Lucida Console", Monaco, monospace;
+				font-size: 14px;
+				/* overflow: hidden; */
+			}
 
-				#content {
-					width: 70%;
-					margin: 0 auto;
-					color: #aaaaaa;
-				}
+			#content {
+				width: 70%;
+				margin: 0 auto;
+				color: #aaaaaa;
+			}
 
-				#content a:link { color: #5555ff; text-decoration: none; }
-				#content a:active { color: #5555ff; text-decoration: none; }
-				#content a:visited { color: #5555ff; text-decoration: none; }
-				#content a:hover { color: #2222ff; text-decoration: none; }
+			#content a:link { color: #5555ff; text-decoration: none; }
+			#content a:active { color: #5555ff; text-decoration: none; }
+			#content a:visited { color: #5555ff; text-decoration: none; }
+			#content a:hover { color: #2222ff; text-decoration: none; }
 
-				#disclaimer {
-					color: #888888;
-				}
+			#disclaimer {
+				color: #888888;
+			}
 
-				#clientinfo {
-					color: #666666;
-				}
+			#clientinfo {
+				color: #666666;
+			}
 
-			</style>
-		</head>
+		</style>
+	</head>
 
-		<body class="home" id="top">
+	<body class="home" id="top">
 		<div id="content">
 			<?php
 				if ($video_url != "") {
