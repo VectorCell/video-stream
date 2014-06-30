@@ -1,11 +1,19 @@
 <?php
 
+// the following global variables may need to be modified based on the server's configuration
+
 // if a video is selected
 $video_url = $_GET["video"];
 
 // for getting the video list
+// the directory on the server where the videos are stored
 $video_dir = "/var/www/public/temp/downloads";
+// the url that points to that directory
 $video_dir_url = "http://vps.bismith.net/temp/downloads";
+
+// the device the server stores the video files on
+// (for Linux and other unix-like OS's)
+$dev = "/dev/vda";
 
 function startsWith($haystack, $needle)
 {
@@ -17,18 +25,24 @@ function endsWith($haystack, $needle)
     return $needle === "" || substr($haystack, -strlen($needle)) === $needle;
 }
 
+// making this script compatible with operating systems other than Linux
+// may require this function to be modified (especially for non-unix-like OS's)
 function getServerFreeSpace()
 {
-	// the device the video files are stored on
-	$dev = "/dev/vda";
-	$split = explode(' ', exec("df -h | grep " . $dev));
-	return $split[14] . "B";
+	global $dev;
+	$os = php_uname('s');
+	if ($os === "Linux") {
+		$split = explode(' ', exec("df -h | grep " . $dev));
+		return $split[14] . "B";
+	} else {
+		return "unknown";
+	}
 }
 
 function getVideoListAsTable($video_dir, $video_dir_url)
 {
-	$video_url = $_GET["video"];
-	$return = "<table border=0>";
+	global $video_url;
+	$return = "\n<table border=0>";
 	$array = scandir($video_dir);
 	foreach ($array as $item) {
 		// $return .= "<tr><td>" . ($video_dir_url . "/" . $item) . "</td></tr>";
@@ -36,7 +50,7 @@ function getVideoListAsTable($video_dir, $video_dir_url)
 		if (($video_dir_url . "/" . $item) === ($video_url)) {
 			$return .= "<tr><td>";
 			$return .= $item . " (current video)";
-			$return .= "</td></tr>";
+			$return .= "</td></tr>\n";
 		} else if (endsWith($item, ".mp4")) {
 			$return .= "<tr>";
 			$return .= "<td><a class=\"mp4link\" href=\"video.php?video=" . $video_dir_url . "/" . $item . "\">" . $item . "</a></td>";
@@ -44,38 +58,39 @@ function getVideoListAsTable($video_dir, $video_dir_url)
 		} else if (endsWith($item, ".mkv")) {
 			$return .= "<tr>";
 			$return .= "<td><a class=\"mkvlink\" href=\"" . $video_dir_url . "/" . $item . "\">" . $item . "</a></td>";
-			$return .= "</tr>";
+			$return .= "</tr>\n";
 		} else if (endsWith($item, ".mp4.!ut") || endsWith($item, ".mkv.!ut")) {
 			$return .= "<tr>";
 			$return .= "<td><span class=\"orange\">" . $item . " (incomplete)</span></td>";
-			$return .= "</tr>";
+			$return .= "</tr>\n";
 		} else if (is_dir($video_dir . "/" . $item) && !startsWith($item, '.')) {
 			$within = scandir($video_dir . "/" . $item);
 			foreach ($within as $thing) {
 				if (($video_dir_url . "/" . $item . "/" . $thing) === ($video_url)) {
 					$return .= "<tr><td>";
 					$return .= $thing . " (current video)";
-					$return .= "</td></tr>";
+					$return .= "</td></tr>\n";
 				} else if (endsWith($thing, ".mp4")) {
 					$return .= "<tr>";
 					$return .= "<td><a class=\"mp4link\" href=\"video.php?video=" . $video_dir_url . "/" . $item . "/" . $thing . "\">" . $thing . "</a></td>";
-					$return .= "</tr>";
+					$return .= "</tr>\n";
 				} else if (endsWith($thing, ".mkv")) {
 					$return .= "<tr>";
 					$return .= "<td><a class=\"mkvlink\" href=\"" . $video_dir_url . "/" . $item . "/" . $thing . "\">" . $thing . "</a></td>";
-					$return .= "</tr>";
+					$return .= "</tr>\n";
 				} else if (endsWith($thing, ".mp4.!ut") || endsWith($thing, ".mkv.!ut")) {
 					$return .= "<tr>";
 					$return .= "<td><span class=\"orange\">" . $thing . " (incomplete)</span></td>";
-					$return .= "</tr>";
+					$return .= "</tr>\n";
 				}
 			}
 		}
 	}
-	$return .= "</table>";
+	$return .= "</table>\n";
 	return $return;
 }
 
+// returns an html5 video player
 function getVideoPlayer($video_url)
 {
 	$return = '<video width="100%" height="auto" controls>';
@@ -126,7 +141,7 @@ function getClientInfo()
 				background-color: #000000;
 				font-family: "Lucida Console", Monaco, monospace;
 				font-size: 14px;
-				/* overflow: hidden; */
+				overflow: hidden;
 			}
 
 			#content {
