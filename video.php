@@ -141,7 +141,7 @@ function getClientInfo()
 				background-color: #000000;
 				font-family: "Lucida Console", Monaco, monospace;
 				font-size: 14px;
-				overflow: hidden;
+				/* overflow: hidden; */
 			}
 
 			#content {
@@ -180,13 +180,8 @@ function getClientInfo()
 		<div id="content">
 			<?php
 				if ($video_url != "") {
-					// if the video url is defined, play that video
-					// <p><a href="video.php">Return to video list</a></p>
-					// echo $video_url;
-					// echo "<h3>" . str_replace($video_dir_url . "/", "", $video_url) . "</h3>";
 					echo "<h3><a class=\"mp4link\" href=\"" . $video_url . "\">" . str_replace($video_dir_url . "/", "", $video_url) . "</a></h3>";
 					echo "<div id=\"video\">" . getVideoPlayer($video_url) . "</div>";
-
 					if (strpos($_SERVER['HTTP_USER_AGENT'], 'Linux') !== false) {
 						echo "<p>";
 						echo "HTML5 MP4 video playback can be enabled in Linux using Firefox with the addition of GStreamer. ";
@@ -194,16 +189,11 @@ function getClientInfo()
 						echo "Ubuntu Restricted Extras <code>(sudo apt-get install ubuntu-restricted-extras)</code>. ";
 						echo "</p>";
 					}
-
 					echo "<p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>";
+					echo "<h1><a class=\"genlink\" href=\"video.php\">Videos</a></h1>";
 				} else {
-					// if there is no video to play, show a list of possible videos
-					// echo "<h1>Videos</h1>";
-					// echo "<h4>Space remaining: " . getServerFreeSpace() . "</h4>";
-					// echo getVideoListAsTable($video_dir, $video_dir_url);
+					echo "<h1>Videos</h1>";
 				}
-
-				echo "<h1>Videos</h1>";
 				echo "<h4>Space remaining: " . getServerFreeSpace() . "</h4>";
 				echo getVideoListAsTable($video_dir, $video_dir_url);
 			?>
