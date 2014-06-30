@@ -27,19 +27,46 @@ function getServerFreeSpace()
 
 function getVideoListAsTable($video_dir, $video_dir_url)
 {
+	$video_url = $_GET["video"];
 	$return = "<table border=0>";
 	$array = scandir($video_dir);
 	foreach ($array as $item) {
-		if (endsWith($item, ".mp4")) {
+		// $return .= "<tr><td>" . ($video_dir_url . "/" . $item) . "</td></tr>";
+		// $return .= "<tr><td>" . $video_url . "</td></tr>";
+		if (($video_dir_url . "/" . $item) === ($video_url)) {
+			$return .= "<tr><td>";
+			$return .= $item . " (current video)";
+			$return .= "</td></tr>";
+		} else if (endsWith($item, ".mp4")) {
 			$return .= "<tr>";
-			$return .= "<td><a href=\"video.php?video=" . $video_dir_url . "/" . $item . "\">" . $item . "</a></td>";
+			$return .= "<td><a class=\"mp4link\" href=\"video.php?video=" . $video_dir_url . "/" . $item . "\">" . $item . "</a></td>";
 			$return .= "</tr>\n";
+		} else if (endsWith($item, ".mkv")) {
+			$return .= "<tr>";
+			$return .= "<td><a class=\"mkvlink\" href=\"" . $video_dir_url . "/" . $item . "\">" . $item . "</a></td>";
+			$return .= "</tr>";
+		} else if (endsWith($item, ".mp4.!ut") || endsWith($item, ".mkv.!ut")) {
+			$return .= "<tr>";
+			$return .= "<td><span class=\"orange\">" . $item . " (incomplete)</span></td>";
+			$return .= "</tr>";
 		} else if (is_dir($video_dir . "/" . $item) && !startsWith($item, '.')) {
 			$within = scandir($video_dir . "/" . $item);
 			foreach ($within as $thing) {
-				if (endsWith($thing, ".mp4")) {
+				if (($video_dir_url . "/" . $item . "/" . $thing) === ($video_url)) {
+					$return .= "<tr><td>";
+					$return .= $thing . " (current video)";
+					$return .= "</td></tr>";
+				} else if (endsWith($thing, ".mp4")) {
 					$return .= "<tr>";
-					$return .= "<td><a href=\"video.php?video=" . $video_dir_url . "/" . $item . "/" . $thing . "\">" . $thing . "</a></td>";
+					$return .= "<td><a class=\"mp4link\" href=\"video.php?video=" . $video_dir_url . "/" . $item . "/" . $thing . "\">" . $thing . "</a></td>";
+					$return .= "</tr>";
+				} else if (endsWith($thing, ".mkv")) {
+					$return .= "<tr>";
+					$return .= "<td><a class=\"mkvlink\" href=\"" . $video_dir_url . "/" . $item . "/" . $thing . "\">" . $thing . "</a></td>";
+					$return .= "</tr>";
+				} else if (endsWith($thing, ".mp4.!ut") || endsWith($thing, ".mkv.!ut")) {
+					$return .= "<tr>";
+					$return .= "<td><span class=\"orange\">" . $thing . " (incomplete)</span></td>";
 					$return .= "</tr>";
 				}
 			}
@@ -79,6 +106,19 @@ function getClientInfo()
 		<title>Video</title>
 		<style type="text/css">
 
+			/* quick tool to allow colored text n' stuff */
+			span.red { color: red; }
+			span.darkred { color: #cc2222; }
+			span.orange { color: orange; }
+			span.yellow { color: yellow; }
+			span.green { color: green; }
+			span.blue { color: blue; }
+			span.purple { color: purple; }
+			span.brown { color: #a52a2a; }
+			span.black { color: black; }
+			span.white { color: white; }
+			span.teal { color: #00ccdd; } /* this is my teal, not their teal... dang W3C */
+
 			body {
 				margin: 0;
 				border: 0;
@@ -95,10 +135,20 @@ function getClientInfo()
 				color: #aaaaaa;
 			}
 
-			#content a:link { color: #5555ff; text-decoration: none; }
-			#content a:active { color: #5555ff; text-decoration: none; }
-			#content a:visited { color: #5555ff; text-decoration: none; }
-			#content a:hover { color: #2222ff; text-decoration: none; }
+			#content a.genlink:link { color: #5555ff; text-decoration: none; }
+			#content a.genlink:visited { color: #5555ff; text-decoration: none; }
+			#content a.genlink:hover { color: #2222ff; text-decoration: none; }
+			#content a.genlink:active { color: #5555ff; text-decoration: none; }
+
+			#content a.mp4link:link { color: #5555ff; text-decoration: none; }
+			#content a.mp4link:visited { color: #5555ff; text-decoration: none; }
+			#content a.mp4link:hover { color: #2222ff; text-decoration: none; }
+			#content a.mp4link:active { color: #5555ff; text-decoration: none; }
+
+			#content a.mkvlink:link { color: #00bb00; text-decoration: none; }
+			#content a.mkvlink:visited { color: #00bb00; text-decoration: none; }
+			#content a.mkvlink:hover { color: #009900; text-decoration: none; }
+			#content a.mkvlink:active { color: #00bb00; text-decoration: none; }
 
 			#disclaimer {
 				color: #888888;
@@ -118,22 +168,29 @@ function getClientInfo()
 					// if the video url is defined, play that video
 					// <p><a href="video.php">Return to video list</a></p>
 					// echo $video_url;
-					echo "<h3>" . str_replace($video_dir_url . "/", "", $video_url) . "</h3>";
+					// echo "<h3>" . str_replace($video_dir_url . "/", "", $video_url) . "</h3>";
+					echo "<h3><a class=\"mp4link\" href=\"" . $video_url . "\">" . str_replace($video_dir_url . "/", "", $video_url) . "</a></h3>";
 					echo "<div id=\"video\">" . getVideoPlayer($video_url) . "</div>";
+
+					if (strpos($_SERVER['HTTP_USER_AGENT'], 'Linux') !== false) {
+						echo "<p>";
+						echo "HTML5 MP4 video playback can be enabled in Linux using Firefox with the addition of GStreamer. ";
+						echo "Perhaps the easiest way to add this support in Ubuntu Linux (and variants) is to install ";
+						echo "Ubuntu Restricted Extras <code>(sudo apt-get install ubuntu-restricted-extras)</code>. ";
+						echo "</p>";
+					}
+
+					echo "<p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>";
 				} else {
 					// if there is no video to play, show a list of possible videos
-					echo "<h1>Videos</h1>";
-					echo "<h4>Space remaining: " . getServerFreeSpace() . "</h4>";
-					echo getVideoListAsTable($video_dir, $video_dir_url);
+					// echo "<h1>Videos</h1>";
+					// echo "<h4>Space remaining: " . getServerFreeSpace() . "</h4>";
+					// echo getVideoListAsTable($video_dir, $video_dir_url);
 				}
 
-				if (strpos($_SERVER['HTTP_USER_AGENT'], 'Linux') !== false) {
-					echo "<p>";
-					echo "HTML5 MP4 video playback can be enabled in Linux using Firefox with the addition of GStreamer. ";
-					echo "Perhaps the easiest way to add this support in Ubuntu Linux (and variants) is to install ";
-					echo "Ubuntu Restricted Extras <code>(sudo apt-get install ubuntu-restricted-extras)</code>. ";
-					echo "</p>";
-				}
+				echo "<h1>Videos</h1>";
+				echo "<h4>Space remaining: " . getServerFreeSpace() . "</h4>";
+				echo getVideoListAsTable($video_dir, $video_dir_url);
 			?>
 			<p id="disclaimer">
 				WARNING: Any unauthorized access to this system is prohibited and is subject to criminal and civil penalties
