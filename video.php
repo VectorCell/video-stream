@@ -196,6 +196,9 @@ function getClientInfo()
 				echo "<h4>Space remaining: " . getServerFreeSpace() . "</h4>";
 				echo getVideoListAsTable($video_dir, $video_dir_url);
 			?>
+			<p id="">
+				The repository for this page can be found at <a class="genlink" href="https://github.com/VectorCell/video-stream">GitHub</a>.
+			</p>
 			<p id="disclaimer">
 				WARNING: Any unauthorized access to this system is prohibited and is subject to criminal and civil penalties
 				under Federal Laws (including but not limited to Public Laws 83-703 and 99-474). Individuals using this system
