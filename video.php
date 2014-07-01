@@ -68,14 +68,30 @@ function getTableRowForItem($item_name, $item_path, $item_url)
 		$return .= "<td>";
 		$return .= "<a class=\"mp4link\" href=\"video.php?video=" . $item_url . "\">" . $item_name . "</a>";
 		if (hasSubtitles($item_path)) {
-			// $return .= "<td>&nbsp;(subtitles)</td>";
 			$subs_url = substr($item_url, 0, strlen($item_url) - strlen(".mp4")) . ".srt";
 			$return .= "<a class=\"srtlink\" href=\"" . $subs_url . "\">&nbsp;(subtitles)</a>";
 		}
 		$return .= "</td>";
 		$return .= "</tr>\n";
 	} else if (endsWith($item_name, ".mkv")) {
-		$return .= "<tr><td><a class=\"mkvlink\" href=\"" . $item_url . "\">" . $item_name . "</a></td></tr>\n";
+		$return .= "<tr>";
+		$return .= "<td>";
+		$return .= "<a class=\"mkvlink\" href=\"" . $item_url . "\">" . $item_name . "</a>";
+		if (hasSubtitles($item_path)) {
+			$subs_url = substr($item_url, 0, strlen($item_url) - strlen(".mkv")) . ".srt";
+			$return .= "<a class=\"srtlink\" href=\"" . $subs_url . "\">&nbsp;(subtitles)</a>";
+		}
+		$return .= "</td>";
+		$return .= "</tr>\n";
+	} else if (endsWith($item_name, ".xspf")) {
+		// to do: eventually make a play in vlc option that uses these playlists
+		$return .= "<tr>";
+		$return .= "<td>";
+		$return .= "<a class=\"xspflink\" href=\"" . $item_url . "\">" . $item_name . "</a>";
+		$return .= "</td>";
+		$return .= "</tr>\n";
+	} else if (endsWith($item_name, ".mp4.!ut") || endsWith($item_name, ".mkv.!ut")) {
+		$return .= "<tr><td><span class=\"orange\">" . substr($item_name, 0, strlen($item_name) - strlen(".!ut")) . " (incomplete)</span></td></tr>\n";
 	}
 	return $return;
 }
@@ -112,10 +128,18 @@ function getClientInfo()
 
 	<head>
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-		<title>Video</title>
+		<title>
+			<?php
+				if ($video_url != "") {
+					echo str_replace($video_dir_url . "/", "", $video_url);
+				} else {
+					echo "Videos";
+				}
+			?>
+		</title>
 		<style type="text/css">
 
-			/* quick tool to allow colored text n' stuff */
+			/* for easy colored text n' stuff */
 			span.red { color: red; }
 			span.darkred { color: #cc2222; }
 			span.orange { color: orange; }
@@ -164,6 +188,11 @@ function getClientInfo()
 			#content a.mkvlink:hover { color: #009900; text-decoration: none; }
 			#content a.mkvlink:active { color: #00bb00; text-decoration: none; }
 
+			#content a.xspflink:link { color: #ffff00; text-decoration: none; }
+			#content a.xspflink:visited { color: #ffff00; text-decoration: none; }
+			#content a.xspflink:hover { color: #ffffff; text-decoration: none; }
+			#content a.xspflink:active { color: #ffff00; text-decoration: none; }
+
 			#disclaimer {
 				color: #888888;
 			}
@@ -196,7 +225,7 @@ function getClientInfo()
 				echo "<h4>Space remaining: " . getServerFreeSpace() . "</h4>";
 				echo getVideoListAsTable($video_dir, $video_dir_url);
 			?>
-			<p id="">
+			<p id="githublink">
 				The repository for this page can be found at <a class="genlink" href="https://github.com/VectorCell/video-stream">GitHub</a>.
 			</p>
 			<p id="disclaimer">
