@@ -15,6 +15,10 @@ $video_dir_url = "http://vps.bismith.net/temp/downloads";
 // (for Linux and other unix-like OS's)
 $dev = "/dev/vda";
 
+// the character the file system uses to separate directories in paths
+// for Linux, that's '/', for Windows, it's '\'
+$sep = DIRECTORY_SEPARATOR;
+
 function startsWith($haystack, $needle)
 {
     return $needle === "" || strpos($haystack, $needle) === 0;
@@ -41,53 +45,43 @@ function getServerFreeSpace()
 
 function getVideoListAsTable($video_dir, $video_dir_url)
 {
-	global $video_url;
-	$return = "\n<table border=0>";
+	global $sep;
+	$return = "";
 	$array = scandir($video_dir);
-	foreach ($array as $item) {
-		// $return .= "<tr><td>" . ($video_dir_url . "/" . $item) . "</td></tr>";
-		// $return .= "<tr><td>" . $video_url . "</td></tr>";
-		if (($video_dir_url . "/" . $item) === ($video_url)) {
-			$return .= "<tr><td>";
-			$return .= $item . " (current video)";
-			$return .= "</td></tr>\n";
-		} else if (endsWith($item, ".mp4")) {
-			$return .= "<tr>";
-			$return .= "<td><a class=\"mp4link\" href=\"video.php?video=" . $video_dir_url . "/" . $item . "\">" . $item . "</a></td>";
-			$return .= "</tr>\n";
-		} else if (endsWith($item, ".mkv")) {
-			$return .= "<tr>";
-			$return .= "<td><a class=\"mkvlink\" href=\"" . $video_dir_url . "/" . $item . "\">" . $item . "</a></td>";
-			$return .= "</tr>\n";
-		} else if (endsWith($item, ".mp4.!ut") || endsWith($item, ".mkv.!ut")) {
-			$return .= "<tr>";
-			$return .= "<td><span class=\"orange\">" . $item . " (incomplete)</span></td>";
-			$return .= "</tr>\n";
-		} else if (is_dir($video_dir . "/" . $item) && !startsWith($item, '.')) {
-			$within = scandir($video_dir . "/" . $item);
-			foreach ($within as $thing) {
-				if (($video_dir_url . "/" . $item . "/" . $thing) === ($video_url)) {
-					$return .= "<tr><td>";
-					$return .= $thing . " (current video)";
-					$return .= "</td></tr>\n";
-				} else if (endsWith($thing, ".mp4")) {
-					$return .= "<tr>";
-					$return .= "<td><a class=\"mp4link\" href=\"video.php?video=" . $video_dir_url . "/" . $item . "/" . $thing . "\">" . $thing . "</a></td>";
-					$return .= "</tr>\n";
-				} else if (endsWith($thing, ".mkv")) {
-					$return .= "<tr>";
-					$return .= "<td><a class=\"mkvlink\" href=\"" . $video_dir_url . "/" . $item . "/" . $thing . "\">" . $thing . "</a></td>";
-					$return .= "</tr>\n";
-				} else if (endsWith($thing, ".mp4.!ut") || endsWith($thing, ".mkv.!ut")) {
-					$return .= "<tr>";
-					$return .= "<td><span class=\"orange\">" . $thing . " (incomplete)</span></td>";
-					$return .= "</tr>\n";
-				}
-			}
-		}
+	foreach ($array as $item_name) {
+		$return .= getTableRowForItem($item_name, $video_dir . $sep . $item_name, $video_dir_url . "/" . $item_name);
 	}
-	$return .= "</table>\n";
+	return "\n<table border=0>\n" . $return . "</table>\n";
+}
+
+function getTableRowForItem($item_name, $item_path, $item_url)
+{
+	global $sep;
+	$return = "";
+	if (is_dir($item_path) && !startsWith($item_name, '.')) {
+		$array = scandir($item_path);
+		foreach ($array as $item) {
+			$return .= getTableRowForItem($item, $item_path . $sep . $item, $item_url . "/" . $item);
+		}
+	} else if (endsWith($item_name, ".mp4")) {
+		$return .= "<tr>";
+		$return .= "<td>";
+		$return .= "<a class=\"mp4link\" href=\"video.php?video=" . $item_url . "\">" . $item_name . "</a>";
+		if (hasSubtitles($item_path)) {
+			// $return .= "<td>&nbsp;(subtitles)</td>";
+			$subs_url = substr($item_url, 0, strlen($item_url) - strlen(".mp4")) . ".srt";
+			$return .= "<a class=\"srtlink\" href=\"" . $subs_url . "\">&nbsp;(subtitles)</a>";
+		}
+		$return .= "</td>";
+		$return .= "</tr>\n";
+	} else if (endsWith($item_name, ".mkv")) {
+		$return .= "<tr><td><a class=\"mkvlink\" href=\"" . $item_url . "\">" . $item_name . "</a></td></tr>\n";
+	}
 	return $return;
+}
+
+function hasSubtitles($video_path) {
+	return file_exists(substr($video_path, 0, strlen($video_name) - strlen(".mp4")) . ".srt");
 }
 
 // returns an html5 video player
@@ -159,6 +153,11 @@ function getClientInfo()
 			#content a.mp4link:visited { color: #5555ff; text-decoration: none; }
 			#content a.mp4link:hover { color: #2222ff; text-decoration: none; }
 			#content a.mp4link:active { color: #5555ff; text-decoration: none; }
+
+			#content a.srtlink:link { color: #00bbdd; text-decoration: none; }
+			#content a.srtlink:visited { color: #00bbdd; text-decoration: none; }
+			#content a.srtlink:hover { color: #0099aa; text-decoration: none; }
+			#content a.srtlink:active { color: #00bbdd; text-decoration: none; }
 
 			#content a.mkvlink:link { color: #00bb00; text-decoration: none; }
 			#content a.mkvlink:visited { color: #00bb00; text-decoration: none; }
