@@ -29,6 +29,11 @@ function endsWith($haystack, $needle)
     return $needle === "" || substr($haystack, -strlen($needle)) === $needle;
 }
 
+function isNotEmpty($string)
+{
+	return $string != "";
+}
+
 // making this script compatible with operating systems other than Linux
 // may require this function to be modified (especially for non-unix-like OS's)
 function getServerFreeSpace()
@@ -36,8 +41,10 @@ function getServerFreeSpace()
 	global $dev;
 	$os = php_uname('s');
 	if ($os === "Linux") {
-		$split = explode(' ', exec("df -h | grep " . $dev));
-		return $split[14] . "B";
+		$output = exec("df -h | grep " . $dev);
+		$split = explode(' ', $output);
+		$filtered = array_filter($split, "isNotEmpty");
+		return array_slice($filtered, 3, 1)[0] . "B";
 	} else {
 		return "unknown";
 	}
